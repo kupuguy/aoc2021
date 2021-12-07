@@ -22,7 +22,7 @@ def mark(board, numbers):
                 if not col:
                     return count, sum(sum(c) for c in columns) * number
     
-with open('day4.txt') as f:
+with open('../input/day4.txt') as f:
     numbers = [int(n) for n in f.readline().strip().split(',')]
     assert not f.readline().strip()
     boards = []

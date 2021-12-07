@@ -11,7 +11,7 @@ data = '''00100
 00010
 01010'''.split()
 
-data = [l.strip() for l in open('day3.txt').readlines() if l.strip()]
+data = [l.strip() for l in open('../input/day3.txt').readlines() if l.strip()]
 
 from collections import Counter
 most = []

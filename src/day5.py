@@ -11,8 +11,8 @@ class Vent:
     start: Point
     end: Point
     
-lines = open('day5-test.txt').readlines()
-lines = open('day5.txt').readlines()
+lines = open('../input/day5-test.txt').readlines()
+lines = open('../input/day5.txt').readlines()
 
 
 def parse(lines):
