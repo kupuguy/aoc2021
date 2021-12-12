@@ -2,71 +2,45 @@ from collections import defaultdict
 from rich import print
 
 
-def find_path(routes, seen, current, required):
-    #print("x", current, seen)
+def find_path(routes: dict[str, set], seen: set, current: str, small_caves: set[str], small_cave_count: int=0):
     for nxt in routes[current]:
-        if nxt.islower():
-            if nxt in seen:
-                continue  # can't revisit a small room.
-            seen.append(nxt)
+        if nxt in small_caves:
             if nxt == "end":
                 yield seen
-                seen.pop(-1)
-                continue
+            elif len(seen | {nxt}) < small_cave_count+1:
+                continue  # can't revisit a small room.
+            else:
+                yield from find_path(routes, seen | {nxt}, nxt, small_caves, small_cave_count+1)
         else:
-            seen.append(nxt)
-        yield from find_path(routes, seen, nxt, required)
-        seen.pop(-1)
+            yield from find_path(routes, seen, nxt, small_caves, small_cave_count)
 
+def load(filename: str) -> dict[str, set]:
+    routes = defaultdict(set)
+    for a, b in [line.strip().split("-") for line in open(filename)]:
+        # avoid adding any routes back to start
+        if b != 'start':
+            routes[a].add(b)
+        if a != 'start':
+            routes[b].add(a)
+    # and no routes away from end
+    routes['end'] = set()
+    return routes
 
 def part1(filename):
-    routes = defaultdict(list)
-    for a, b in [line.strip().split("-") for line in open(filename)]:
-        routes[a].append(b)
-        routes[b].append(a)
-
-    seen = ["start"]
-    current = "start"
-    required = {cave for cave in routes if cave.islower()}
-    return len(list(find_path(routes, seen, current, required)))
+    routes = load(filename)
+    
+    small_caves = {cave for cave in routes if cave.islower()}
+    return len(list(find_path(routes, seen=set(), current='start', small_caves=small_caves, small_cave_count=0)))
 
 
 assert part1("../input/day12-test.txt") == 19
 print("part 1", part1("../input/day12.txt"))
 
-def count_small_bad(seen):
-    counter = defaultdict(int)
-    for c in seen:
-        if c.islower():
-            counter[c] += 1
-    return any(c > 2 for c in counter.values()) or sum(c > 1 for c in counter.values()) > 1
-
-def find_path2(routes, seen, current, required):
-    for nxt in routes[current]:
-        if nxt.islower():
-            if nxt == 'start': continue
-            if nxt == "end":
-                yield seen
-                continue
-            if nxt in seen and count_small_bad(seen + [nxt]):
-                continue  # can't revisit another small room.
-            seen.append(nxt)
-        else:
-            seen.append(nxt)
-        yield from find_path2(routes, seen, nxt, required)
-        seen.pop(-1)
-
-
 def part2(filename):
-    routes = defaultdict(list)
-    for a, b in [line.strip().split("-") for line in open(filename)]:
-        routes[a].append(b)
-        routes[b].append(a)
+    routes = load(filename)
+    
+    small_caves = {cave for cave in routes if cave.islower()}
+    return len(list(find_path(routes, seen=set(), current='start', small_caves=small_caves, small_cave_count=-1)))
 
-    seen = ["start"]
-    current = "start"
-    required = {cave for cave in routes if cave.islower()}
-    return len(list(find_path2(routes, seen, current, required)))
-
-assert part2("../input/day12-test.txt") == 103,  part2("../input/day12-test.txt")
+assert part2("../input/day12-test.txt") == 103
 print("part 2", part2("../input/day12.txt"))
