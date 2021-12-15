@@ -1,7 +1,7 @@
 from rich import print
 
 
-def load(filename: str) -> object:
+def load(filename: str) -> list[list[int]]:
     with open(filename) as f:
         grid = [[int(n) for n in line.strip()] for line in f if line.strip()]
     return grid
