@@ -1,8 +1,11 @@
+from rich import print
+from math import prod
+
 def load(s: str) -> str:
     return format(int("1" + s, 16), "0b")[1:]
 
 
-def decode_packet(s: str) -> tuple:
+def decode_packet(s: str) -> tuple[int, int, int|list, str]:
     v = int(s[:3], 2)
     t = int(s[3:6], 2)
     if t == 4:
@@ -39,12 +42,15 @@ def decode_packet(s: str) -> tuple:
 # print(decode_packet('11101110000000001101010000001100100000100011000001100000'))
 
 
-def sum_versions(packets):
-    v, t, sub = packets
-    if isinstance(sub, list):
-        return v + sum(sum_versions(p) for p in sub)
-    return v
-
+def sum_versions(packet: tuple) -> int:
+    match packet:
+        case int(v), 4, int(n):
+            return v
+        case int(v), int(_), list(sub):
+            return v + sum(sum_versions(p) for p in sub)
+        case _:
+            raise RuntimeError("Unknown packet {packet}")
+    
 
 def part1(s: str) -> int:
     packets = decode_packet(load(s))
@@ -60,30 +66,26 @@ assert part1("A0016C880162017C3686B18A3D4780") == 31
 print("Part 1", part1(open("../input/day16.txt").read().strip()))
 
 
-def calculate(packet):
-    v, t, x = packet
-    match t:
-        case 0:  # sum
-            return sum(calculate(p) for p in x)
-        case 1:  # prod
-            prod = 1
-            for p in x:
-                prod *= calculate(p)
-            return prod
-        case 2:  # minimum
-            return min([calculate(p) for p in x])
-        case 3:  # maximum
-            return max([calculate(p) for p in x])
-        case 4:
-            return x
-        case 5:  # greater
-            return calculate(x[0]) > calculate(x[1])
-        case 6:  # less
-            return calculate(x[0]) < calculate(x[1])
-        case 7:  # equal
-            return calculate(x[0]) == calculate(x[1])
+def calculate(packet: tuple) -> int:
+    match packet:
+        case v, 0, list(packets):  # sum
+            return sum(calculate(p) for p in packets)
+        case v, 1, list(packets):  # prod
+            return prod(calculate(p) for p in packets)
+        case v, 2, list(packets):  # minimum
+            return min(calculate(p) for p in packets)
+        case v, 3, list(packets):  # maximum
+            return max(calculate(p) for p in packets)
+        case v, 4, int(number):
+            return number
+        case v, 5, [tuple(a), tuple(b)]:  # greater
+            return calculate(a) > calculate(a)
+        case v, 6, [tuple(a), tuple(b)]:  # less
+            return calculate(a) < calculate(b)
+        case v, 7, [tuple(a), tuple(b)]:  # equal
+            return calculate(a) == calculate(b)
         case _:
-            assert False, "unknown packet type"
+            raise RuntimeError("Unknown packet {packet}")
 
 
 def part2(s: str) -> int:
