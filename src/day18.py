@@ -1,5 +1,4 @@
 import json
-from typing import TypeAlias
 
 Snail = list[int | list]
 Flat = list[tuple[int, int]]

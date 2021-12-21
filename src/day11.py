@@ -13,7 +13,7 @@ def step(grid):
     for xy in grid:
         grid[xy] += 1
 
-    flashed = [xy for xy in grid if grid[xy]==10]
+    flashed = [xy for xy in grid if grid[xy] == 10]
 
     for xy in flashed:
         for x1, y1 in neighbours(xy, grid):

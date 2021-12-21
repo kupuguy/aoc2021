@@ -2,17 +2,19 @@ input = "3,5,2,5,4,3,2,2,3,5,2,3,2,2,2,2,3,5,3,5,5,2,2,3,4,2,3,5,5,3,3,5,2,4,5,4
 
 from rich import print
 
+
 def next_day(ages):
     first = ages.pop(0)
     ages[6] += first
     ages.append(first)
     return ages
 
+
 # input = "3,4,3,1,2"
 
-data = [int(d) for d in input.split(',')]
+data = [int(d) for d in input.split(",")]
 
-ages = [0]*9
+ages = [0] * 9
 
 for d in data:
     ages[d] += 1
@@ -21,4 +23,3 @@ for i in range(256):
     ages = next_day(ages)
 
 print(sum(ages))
-
