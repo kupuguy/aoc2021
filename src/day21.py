@@ -49,14 +49,14 @@ def ways_to_reach(score, position, turns, start):
     )
 
 
-@cache
+#@cache
 def all_ways_to_reach(score, turns, start):
     return sum(
         ways_to_reach(score, position, turns, start) for position in range(1, 11)
     )
 
 
-@cache
+#@cache
 def ways_to_win(turns, start):
     ways = 0
     for final_score in range(21, 31):
@@ -70,17 +70,17 @@ def ways_to_win(turns, start):
     return ways
 
 
-@cache
+#@cache
 def ways_to_lose(turns, start):
     return sum(all_ways_to_reach(score, turns, start) for score in range(21))
 
 
 def part2(p1, p2):
     p1_wins = sum(
-        ways_to_win(turns, p1) * ways_to_lose(turns - 1, p2) for turns in range(2, 22)
+        ways_to_win(turns, p1) * ways_to_lose(turns - 1, p2) for turns in range(2, 15)
     )
     p2_wins = sum(
-        ways_to_win(turns, p2) * ways_to_lose(turns, p1) for turns in range(2, 22)
+        ways_to_win(turns, p2) * ways_to_lose(turns, p1) for turns in range(2, 15)
     )
     # print(p1_wins, p2_wins)
     return max(p1_wins, p2_wins)
