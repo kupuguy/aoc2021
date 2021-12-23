@@ -40,10 +40,13 @@ def moves2(state):
                 if state[rt + 2] == ".":
                     if state[rt + 3] == ".":
                         yield switch(state, rt, rt + 3), COSTS[state[rt]] * 3
+                        return
                     else:
                         yield switch(state, rt, rt + 2), COSTS[state[rt]] * 2
+                        return
                 else:
                     yield switch(state, rt, rt + 1), COSTS[state[rt]]
+                    return
 
     # room lower to room top if empty and not target room
     for rt, target in ((R1T, "A"), (R2T, "B"), (R3T, "C"), (R4T, "D")):
@@ -52,10 +55,30 @@ def moves2(state):
         ):
             if state[rt + 1] != ".":
                 yield switch(state, rt, rt + 1), COSTS[state[rt + 1]]
+                return
             elif state[rt + 2] != ".":
                 yield switch(state, rt, rt + 2), 2 * COSTS[state[rt + 2]]
+                return
             else:
                 yield switch(state, rt, rt + 3), 3 * COSTS[state[rt + 3]]
+                return
+
+    # hallway to room top if target and empty and room lower empty or has target and intervening empty
+    for hall in range(11):
+        if state[hall] == ".":
+            continue
+        target = TARGET_TOP[state[hall]]
+        if state[target] != "." or any(
+            state[target + n] not in (".", state[hall]) for n in (1, 2, 3)
+        ):
+            continue
+        h0 = (target - 11) // 2 + 2
+        if h0 > hall and all(state[h] == "." for h in range(hall + 1, h0)):
+            yield switch(state, hall, target), COSTS[state[hall]] * (h0 - hall + 1)
+            return
+        elif h0 < hall and all(state[h] == "." for h in range(h0, hall)):
+            yield switch(state, hall, target), COSTS[state[hall]] * (hall - h0 + 1)
+            return
 
     # room top to hallway space excluding no_stop and intervening empty
     for rt in (R1T, R2T, R3T, R4T):
@@ -79,21 +102,6 @@ def moves2(state):
             if state[hall] != ".":
                 break
             yield switch(state, rt, hall), COSTS[state[rt]] * (hall - h0 + 1)
-
-    # hallway to room top if target and empty and room lower empty or has target and intervening empty
-    for hall in range(11):
-        if state[hall] == ".":
-            continue
-        target = TARGET_TOP[state[hall]]
-        if state[target] != "." or any(
-            state[target + n] not in (".", state[hall]) for n in (1, 2, 3)
-        ):
-            continue
-        h0 = (target - 11) // 2 + 2
-        if h0 > hall and all(state[h] == "." for h in range(hall + 1, h0)):
-            yield switch(state, hall, target), COSTS[state[hall]] * (h0 - hall + 1)
-        elif h0 < hall and all(state[h] == "." for h in range(h0, hall)):
-            yield switch(state, hall, target), COSTS[state[hall]] * (hall - h0 + 1)
 
 
 def show(state, cost):
